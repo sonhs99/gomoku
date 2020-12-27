@@ -58,23 +58,22 @@ class ZeroTreeNode:
         return 0
         
 class ZeroAgent(base.Agent):
-    def __init__(self, model, encoder, num_rounds=1600, temperature=0.0, c=2.0,):
+    def __init__(self, model, encoder, num_rounds=1600, c=2.0):
         self._model = model
         self._encoder = encoder
         self._collector = None
         self.num_rounds = num_rounds
         self.c = c
-        self.temperature = temperature
+        self.temperature = 0.0
 
     def set_collector(self, collector):
         self._collector = collector
     
     def set_temperature(self, temperature):
-        self.c = temperature
+        self.temperature = temperature
 
     def select_branch(self, node):
         total_n = node.total_visit_count
-        e = False
         if np.random.rand() < self.temperature:
             actions = list(node.actions())
             return actions[np.random.randint(0, len(actions))]
@@ -162,7 +161,6 @@ class ZeroAgent(base.Agent):
         h5file['encoder'].attrs['name'] = self._encoder.name()
         h5file['encoder'].attrs['board_size'] = self._encoder.board_size
         h5file.create_group('agent')
-        h5file['agent'].attrs['temperature'] = self.c
         h5file['agent'].attrs['num_rounds'] = self.num_rounds
         h5file.create_group('model')
         kerasutil.save_model_to_hdf5_group(self._model, h5file['model'])
@@ -172,7 +170,6 @@ class ZeroAgent(base.Agent):
         model = kerasutil.load_model_from_hdf5_group(h5file['model'])
         encoder_name = h5file['encoder'].attrs['name']
         board_size = h5file['encoder'].attrs['board_size']
-        temperature = h5file['agent'].attrs['temperature']
         num_rounds = h5file['agent'].attrs['num_rounds']
         encoder = zeroencoder.ZeroEncoder(board_size)
-        return ZeroAgent(model, encoder, num_rounds, temperature)
+        return ZeroAgent(model, encoder, num_rounds)

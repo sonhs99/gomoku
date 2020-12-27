@@ -27,7 +27,7 @@ def main():
         learning_agent.train(exp_buffer, lr=args.lr, batch_size=args.bs, clipnorm=1)
 
     with h5py.File(args.agent_out, 'w') as updated_agent_outf:
-        learning_agent.serialize(updated_agent_outf)
+        learning_agent.save(updated_agent_outf)
 
 
 if __name__ == '__main__':
